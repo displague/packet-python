@@ -51,9 +51,12 @@ class BaseAPI(object):
         self.end_point = "api.packet.net"
         self._log = logging.getLogger(__name__)
 
-    def call_api(self, method, type="GET", params=None):  # noqa
+    def call_api(self, method, type="GET", params=None, opts=None):  # noqa
         if params is None:
             params = {}
+
+        if opts is None:
+            opts = {}
 
         url = "https://" + self.end_point + "/" + method
 
@@ -62,6 +65,13 @@ class BaseAPI(object):
             "X-Consumer-Token": self.consumer_token,
             "Content-Type": "application/json",
         }
+
+        # Following redirects is default behavior for requests.
+        # Some 201 responses include a location to a url that can
+        # not be accessed.
+        allow_redirects = True
+        if "allow_redirects" in opts:
+            allow_redirects = opts["allow_redirects"]
 
         # remove token from log
         headers_str = str(headers).replace(self.auth_token.strip(), "TOKEN")
@@ -77,6 +87,7 @@ class BaseAPI(object):
                     data=json.dumps(
                         params, default=lambda o: o.__dict__, sort_keys=True, indent=4
                     ),
+                    allow_redirects = allow_redirects,
                 )
             elif type == "DELETE":
                 resp = requests.delete(url, headers=headers)

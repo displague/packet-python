@@ -27,8 +27,8 @@ class Manager(BaseAPI):
     def __init__(self, auth_token, consumer_token=None):
         super(Manager, self).__init__(auth_token, consumer_token)
 
-    def call_api(self, method, type="GET", params=None):
-        return super(Manager, self).call_api(method, type, params)
+    def call_api(self, method, type="GET", params=None, opts=None):
+        return super(Manager, self).call_api(method, type, params, opts)
 
     def get_user(self):
         return self.call_api("user")
@@ -194,7 +194,9 @@ class Manager(BaseAPI):
 
     def create_ssh_key(self, label, public_key):
         params = {"key": public_key, "label": label}
-        data = self.call_api("ssh-keys", type="POST", params=params)
+        data = self.call_api("ssh-keys", type="POST",
+                             params=params,
+                             opts={"allow_redirects": False})
         return SSHKey(data, self)
 
     def create_project_ssh_key(self, project_id, label, public_key):
